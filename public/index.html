@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Live Image Collage</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<script>
+  let shownImages = new Set();
+  let zIndexCounter = 1;
+
+  function getRandomScale() {
+    return 0.5 + Math.random() * 0.25; // 0.5 to 0.75
+  }
+
+  function getRandomPosition(scale) {
+    const imgSize = 400 * scale; // estimate max size for positioning
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    return {
+      x: Math.random() * (w - imgSize),
+      y: Math.random() * (h - imgSize),
+    };
+  }
+
+function addImage(fileName) {
+  const img = document.createElement('img');
+  img.src = `images/${fileName}`;
+  img.style.position = 'absolute';
+  img.style.opacity = '0';
+  document.body.appendChild(img);
+
+  img.onload = () => {
+    const baseWidth = img.naturalWidth * 0.7; // 70% size
+    const baseHeight = img.naturalHeight * 0.7;
+
+    const randomScale = 0.5 + Math.random() * 0.7;
+    const finalWidth = baseWidth * randomScale;
+    const finalHeight = baseHeight * randomScale;
+
+    // Allow position so image can overflow by up to 30% of its size on any side
+    // This ensures corners can be covered without forcing scroll
+    const overflowX = finalWidth * 0.3;
+    const overflowY = finalHeight * 0.3;
+
+    // Position randomly between -overflow and (viewport - size + overflow)
+    const x = Math.random() * (window.innerWidth - finalWidth + overflowX * 2) - overflowX;
+    const y = Math.random() * (window.innerHeight - finalHeight + overflowY * 2) - overflowY;
+
+    img.style.left = `${x}px`;
+    img.style.top = `${y}px`;
+
+    img.style.width = `${baseWidth}px`;
+    img.style.height = `${baseHeight}px`;
+    img.style.transform = `scale(${randomScale})`;
+
+    setTimeout(() => {
+      img.style.opacity = '1';
+    }, 100);
+  };
+}
+
+  async function fetchImages() {
+    try {
+      const res = await fetch('/images');
+      const files = await res.json();
+
+      files.forEach(file => {
+        if (!shownImages.has(file)) {
+          shownImages.add(file);
+          addImage(file);
+        }
+      });
+    } catch (e) {
+      console.error('Failed to fetch images:', e);
+    }
+  }
+
+  setInterval(fetchImages, 10000);
+  fetchImages();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,11 @@
+body {
+  margin: 0;
+  overflow: hidden; /* hide scrollbars */
+  background: #ffffff;
+  position: relative; /* optional but safe */
+}
+
+img {
+  position: absolute;
+  /* no max width/height */
+}
