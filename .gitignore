@@ -8,3 +8,10 @@ node_modules/
 **/*.gif
 **/*.webp
 **/*.svg
+
+# Ignore all .DS_Store files
+**/.DS_Store        
+
+# Ignore all .env files         
+**/.env
+# Ignore all .env.local files

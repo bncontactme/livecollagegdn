@@ -1,11 +1,15 @@
+require('dotenv').config();
 const OBSWebSocket = require('obs-websocket-js').default;
 const fs = require('fs');
 const path = require('path');
 
 const obs = new OBSWebSocket();
 const SCREENSHOT_INTERVAL = 5000;
-const SCENE_SWITCH_INTERVAL = 10000; // e.g. switch every 10 seconds
+const SCENE_SWITCH_INTERVAL = 10000;
 const SCREENSHOT_FOLDER = path.resolve(__dirname, 'images');
+
+const OBS_WEBSOCKET_URL = process.env.OBS_WEBSOCKET_URL || 'ws://localhost:4455';
+const OBS_WEBSOCKET_PASSWORD = process.env.OBS_WEBSOCKET_PASSWORD || '';
 
 if (!fs.existsSync(SCREENSHOT_FOLDER)) {
     fs.mkdirSync(SCREENSHOT_FOLDER, { recursive: true });
@@ -13,7 +17,7 @@ if (!fs.existsSync(SCREENSHOT_FOLDER)) {
 
 async function connectOBS() {
     try {
-        await obs.connect('ws://192.168.0.191:4455', '');
+        await obs.connect(OBS_WEBSOCKET_URL, OBS_WEBSOCKET_PASSWORD);
         console.log('✅ Connected to OBS WebSocket');
 
         // Get all scenes
@@ -39,7 +43,6 @@ async function connectOBS() {
             const fullPath = path.join(SCREENSHOT_FOLDER, fileName);
 
             try {
-                // Get the current program scene name
                 const { currentProgramSceneName } = await obs.call('GetCurrentProgramScene');
                 const { imageData } = await obs.call('GetSourceScreenshot', {
                     sourceName: currentProgramSceneName,
