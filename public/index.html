@@ -1,66 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<title>Live Image Collage</title>
-<link rel="stylesheet" href="styles.css" />
-</head>
-<body>
-
 <script>
   let shownImages = new Set();
   let zIndexCounter = 1;
 
-  function getRandomScale() {
-    return 0.5 + Math.random() * 0.25; // 0.5 to 0.75
-  }
+  function addImage(fileName) {
+    const img = document.createElement('img');
+    img.src = `images/${fileName}`;
+    img.style.position = 'absolute';
+    img.style.opacity = '0';
+    img.style.zIndex = zIndexCounter++;
+    document.body.appendChild(img);
 
-  function getRandomPosition(scale) {
-    const imgSize = 400 * scale; // estimate max size for positioning
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    return {
-      x: Math.random() * (w - imgSize),
-      y: Math.random() * (h - imgSize),
+    img.onload = () => {
+      // Scale based on window size: 50% to 80% of the smaller dimension
+      const minDim = Math.min(window.innerWidth, window.innerHeight);
+      const scale = 0.5 + Math.random() * 0.3; // 0.5 to 0.8
+      const baseWidth = img.naturalWidth;
+      const baseHeight = img.naturalHeight;
+      const aspect = baseWidth / baseHeight;
+
+      let finalWidth = minDim * scale;
+      let finalHeight = finalWidth / aspect;
+
+      // If height would overflow, adjust
+      if (finalHeight > window.innerHeight * 0.95) {
+        finalHeight = window.innerHeight * 0.95;
+        finalWidth = finalHeight * aspect;
+      }
+
+      // Position so image is always fully visible
+      const x = Math.random() * (window.innerWidth - finalWidth);
+      const y = Math.random() * (window.innerHeight - finalHeight);
+
+      img.style.left = `${x}px`;
+      img.style.top = `${y}px`;
+      img.style.width = `${finalWidth}px`;
+      img.style.height = `${finalHeight}px`;
+
+      img.style.opacity = '1';
     };
   }
-
-function addImage(fileName) {
-  const img = document.createElement('img');
-  img.src = `images/${fileName}`;
-  img.style.position = 'absolute';
-  img.style.opacity = '0';
-  document.body.appendChild(img);
-
-  img.onload = () => {
-    const baseWidth = img.naturalWidth * 0.7; // 70% size
-    const baseHeight = img.naturalHeight * 0.7;
-
-    const randomScale = 0.5 + Math.random() * 0.7;
-    const finalWidth = baseWidth * randomScale;
-    const finalHeight = baseHeight * randomScale;
-
-    // Allow position so image can overflow by up to 30% of its size on any side
-    // This ensures corners can be covered without forcing scroll
-    const overflowX = finalWidth * 0.3;
-    const overflowY = finalHeight * 0.3;
-
-    // Position randomly between -overflow and (viewport - size + overflow)
-    const x = Math.random() * (window.innerWidth - finalWidth + overflowX * 2) - overflowX;
-    const y = Math.random() * (window.innerHeight - finalHeight + overflowY * 2) - overflowY;
-
-    img.style.left = `${x}px`;
-    img.style.top = `${y}px`;
-
-    img.style.width = `${baseWidth}px`;
-    img.style.height = `${baseHeight}px`;
-    img.style.transform = `scale(${randomScale})`;
-
-    setTimeout(() => {
-      img.style.opacity = '1';
-    }, 100);
-  };
-}
 
   async function fetchImages() {
     try {
@@ -78,9 +56,8 @@ function addImage(fileName) {
     }
   }
 
-  setInterval(fetchImages, 1000 );
+  setInterval(fetchImages, 1000);
   fetchImages();
-</script>
 
-</body>
-</html>
+  window.addEventListener('resize', () => location.reload());
+</script>
