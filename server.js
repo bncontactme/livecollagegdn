@@ -25,7 +25,7 @@ app.get('/images', (req, res) => {
 
 // Live cropping service: try to crop the last image every 10 seconds with 50% probability
 setInterval(() => {
-    cropLastImageWithProbability({ probability: 0.1})
+    cropLastImageWithProbability({ probability: 0.5})
         .then(() => {
             console.log('Auto-cropping attempt (10% probability).');
             // Clean up the image folder if there are 50 or more images

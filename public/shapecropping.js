@@ -31,7 +31,6 @@ function cropStar(ctx, w, h, spikes = 5) {
 }
 
 async function cropLastImageWithProbability(options = {}) {
-    // options: { probability: 0.5 }
     const probability = typeof options.probability === 'number' ? options.probability : 0.5;
 
     const files = fs.readdirSync(imagesDir)
