@@ -107,15 +107,18 @@ async function uploadFile(filePath) {
 
 // Check for new images in the captures folder and upload them
 async function uploadImagesFromFolder() {
-  const capturesDir = path.join(__dirname, 'captures');
+  // Absolute path to public/screenshotimages
+  const screenshotImagesDir = path.join(__dirname, 'screenshotimages');
 
-  if (!fs.existsSync(capturesDir)) {
-    console.log('Captures folder does not exist');
+  if (!fs.existsSync(screenshotImagesDir)) {
+    console.log('screenshotimages folder does not exist');
     return;
   }
 
-  const files = fs.readdirSync(capturesDir);
-  const imageFiles = files.filter(file => file.endsWith('.png'));
+  const files = fs.readdirSync(screenshotImagesDir);
+  const imageFiles = files.filter(file =>
+    ['.jpg', '.jpeg', '.png', '.gif'].includes(path.extname(file).toLowerCase())
+  );
 
   if (imageFiles.length === 0) {
     console.log('No new images to upload');
@@ -123,7 +126,7 @@ async function uploadImagesFromFolder() {
   }
 
   for (const file of imageFiles) {
-    const filePath = path.join(capturesDir, file);
+    const filePath = path.join(screenshotImagesDir, file);
     await uploadFile(filePath);
   }
 }

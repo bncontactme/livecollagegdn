@@ -15,3 +15,5 @@ node_modules/
 # Ignore all .env files         
 **/.env
 # Ignore all .env.local files
+public/token.json
+public/uploaded_files.json

@@ -5,6 +5,11 @@ require('./public/obsclient').connectOBS();
 
 const { cropLastImageWithProbability } = require('./public/shapecropping');
 
+// === Google Drive Upload Integration ===
+const { uploadImagesFromFolder, loadToken } = require('./public/driveupload');
+loadToken(); // Load Google OAuth token at server startup
+// =======================================
+
 const app = express();
 const IMAGE_DIR = path.join(__dirname, 'public', 'images');
 const STOCK_DIR = path.join(__dirname, 'public', 'stockimages');
@@ -23,6 +28,17 @@ app.get('/images', (req, res) => {
         res.json(images);
     });
 });
+
+// === Google Drive Upload Endpoint ===
+app.get('/upload-screenshots', async (req, res) => {
+    try {
+        await uploadImagesFromFolder();
+        res.send('Screenshot images upload process completed.');
+    } catch (err) {
+        res.status(500).send('Error uploading images: ' + err.message);
+    }
+});
+// ====================================
 
 // Feed a random stock image into the images folder every 10 seconds
 setInterval(() => {
@@ -64,6 +80,15 @@ setInterval(() => {
         })
         .catch(err => console.error('Cropping failed:', err));
 }, 10000); // 10 seconds
+
+setInterval(async () => {
+    try {
+        await uploadImagesFromFolder();
+        console.log('Automatic screenshot upload check completed.');
+    } catch (err) {
+        console.error('Error during automatic screenshot upload:', err.message);
+    }
+}, 20000); // 20 seconds
 
 const PORT = 3000;
 app.listen(PORT, () => {
