@@ -76,8 +76,7 @@ async function uploadFile(filePath) {
 
   // Skip if already uploaded
   if (uploadedFiles.includes(fileName)) {
-    console.log(`Skipping already uploaded file: ${fileName}`);
-    return;
+    return false; // Indicate skipped
   }
 
   const fileMetadata = {
@@ -100,18 +99,20 @@ async function uploadFile(filePath) {
     // Save this file name to the list of uploaded files
     uploadedFiles.push(fileName);
     saveUploadedFiles(uploadedFiles);
+    return true; // Indicate uploaded
   } catch (error) {
     console.error('Error uploading file:', error.message);
+    return false;
   }
 }
 
 // Check for new images in the captures folder and upload them
 async function uploadImagesFromFolder() {
-  // Absolute path to public/screenshotimages
-  const screenshotImagesDir = path.join(__dirname, 'screenshotimages');
+  // Absolute path to public/takescreenshots
+  const screenshotImagesDir = path.join(__dirname, 'takescreenshots');
 
   if (!fs.existsSync(screenshotImagesDir)) {
-    console.log('screenshotimages folder does not exist');
+    console.log('takescreenshots folder does not exist');
     return;
   }
 
@@ -125,9 +126,16 @@ async function uploadImagesFromFolder() {
     return;
   }
 
+  let skippedAny = false;
   for (const file of imageFiles) {
     const filePath = path.join(screenshotImagesDir, file);
-    await uploadFile(filePath);
+    const uploaded = await uploadFile(filePath);
+    if (uploaded === false) {
+      skippedAny = true;
+    }
+  }
+  if (skippedAny) {
+    console.log('Skipped already uploaded images.');
   }
 }
 
